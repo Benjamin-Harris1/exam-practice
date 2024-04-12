@@ -1,5 +1,6 @@
 package kea.exercise.examframework.service.productorder;
 
+import kea.exercise.examframework.dto.ProductDTO;
 import kea.exercise.examframework.dto.ProductOrderDTO;
 import kea.exercise.examframework.entity.Product;
 import kea.exercise.examframework.entity.ProductOrder;
@@ -55,6 +56,10 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         ProductOrderDTO dto = new ProductOrderDTO();
         dto.setId(productOrder.getId());
         dto.setQuantity(productOrder.getQuantity());
+
+        // Convert product ent to productDTO
+        ProductDTO productDTO = productService.convertToDTO(productOrder.getProduct());
+        dto.setProductId(productDTO.getId());
         return dto;
     }
 
@@ -62,14 +67,11 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         ProductOrder productOrder = new ProductOrder();
         productOrder.setId(productOrderDTO.getId());
         productOrder.setQuantity(productOrderDTO.getQuantity());
-        if (productOrderDTO.getProduct() != null) {
-            Product product = new Product();
-            product.setId(productOrderDTO.getProduct().getId());
-            product.setName(productOrderDTO.getProduct().getName());
-            product.setPrice(productOrderDTO.getProduct().getPrice());
-            product.setWeight(productOrderDTO.getProduct().getWeight());
-            productOrder.setProduct(product);
-        }
+
+        // Set product based on product id
+        ProductDTO productDTO = productService.findById(productOrderDTO.getProductId());
+        Product product = productService.convertToEntity(productDTO);
+        productOrder.setProduct(product);
         return productOrder;
     }
 }

@@ -11,4 +11,6 @@ public interface ProductService {
     ProductDTO create(ProductDTO productDTO);
     ProductDTO update(int id, ProductDTO productDTO);
     void deleteProduct(int id);
+    Product convertToEntity(ProductDTO productDTO);
+    ProductDTO convertToDTO(Product product);
 }

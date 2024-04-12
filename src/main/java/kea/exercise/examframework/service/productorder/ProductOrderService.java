@@ -1,6 +1,7 @@
 package kea.exercise.examframework.service.productorder;
 
 import kea.exercise.examframework.dto.ProductOrderDTO;
+import kea.exercise.examframework.entity.ProductOrder;
 
 import java.util.List;
 
@@ -10,5 +11,9 @@ public interface ProductOrderService {
     ProductOrderDTO create(ProductOrderDTO productOrderDTO);
     ProductOrderDTO update(int id, ProductOrderDTO productOrderDTO);
     void deleteProductOrder(int id);
+    ProductOrder convertToEntity(ProductOrderDTO productOrderDTO);
+    ProductOrderDTO convertToDTO(ProductOrder productOrder);
+
+
 
 }
