@@ -30,7 +30,7 @@ public class DeliveryController {
     }
 
     @PostMapping
-    public ResponseEntity<DeliveryDTO> createDelivery(DeliveryDTO deliveryDTO){
+    public ResponseEntity<DeliveryDTO> createDelivery(@RequestBody DeliveryDTO deliveryDTO){
         DeliveryDTO delivery = deliveryService.create(deliveryDTO);
         return ResponseEntity.ok(delivery);
     }

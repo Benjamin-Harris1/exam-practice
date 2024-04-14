@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,8 +24,8 @@ public class Delivery {
     private String fromWareHouse;
     private String destination;
 
-    @OneToMany
-    private List<ProductOrder> productOrders;
+    @OneToMany(mappedBy = "delivery", cascade = CascadeType.PERSIST)
+    private List<ProductOrder> productOrders = new ArrayList<>();
 
     public Delivery(LocalDate deliveryDate, String fromWareHouse, String destination) {
         this.deliveryDate = deliveryDate;

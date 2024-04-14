@@ -21,7 +21,7 @@ public class Product {
     private int price;
     private int weight;
 
-    @OneToMany
+    @OneToMany(mappedBy = "product")
     private List<ProductOrder> productOrders;
 
 

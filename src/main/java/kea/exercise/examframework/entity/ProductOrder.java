@@ -20,6 +20,9 @@ public class ProductOrder {
     @ManyToOne
     private Product product;
 
+    @ManyToOne
+    private Delivery delivery;
+
     public ProductOrder(int quantity, Product product) {
         this.quantity = quantity;
         this.product = product;

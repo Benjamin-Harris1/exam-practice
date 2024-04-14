@@ -30,6 +30,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public ProductDTO findByName(String name) {
+        return productRepository.findByName(name).map(this::convertToDTO).orElseThrow(() -> new RuntimeException("Product not found"));
+    }
+
+    @Override
     public ProductDTO create(ProductDTO productDTO) {
         Product product = convertToEntity(productDTO);
         Product savedProduct = productRepository.save(product);
