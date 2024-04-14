@@ -1,14 +1,18 @@
 package kea.exercise.examframework.service.delivery;
 
 import kea.exercise.examframework.dto.DeliveryDTO;
+import kea.exercise.examframework.dto.ProductDTO;
 import kea.exercise.examframework.dto.ProductOrderDTO;
 import kea.exercise.examframework.entity.Delivery;
+import kea.exercise.examframework.entity.Product;
 import kea.exercise.examframework.entity.ProductOrder;
 import kea.exercise.examframework.repository.DeliveryRepository;
+import kea.exercise.examframework.service.product.ProductService;
 import kea.exercise.examframework.service.productorder.ProductOrderService;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,10 +22,12 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     private final DeliveryRepository deliveryRepository;
     private final ProductOrderService productOrderService;
+    private final ProductService productService;
 
-    public DeliveryServiceImpl(DeliveryRepository deliveryRepository, ProductOrderService productOrderService) {
+    public DeliveryServiceImpl(DeliveryRepository deliveryRepository, ProductOrderService productOrderService, ProductService productService) {
         this.deliveryRepository = deliveryRepository;
         this.productOrderService = productOrderService;
+        this.productService = productService;
     }
 
     @Override
@@ -55,23 +61,39 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     @Override
     public DeliveryDTO update(int id, DeliveryDTO deliveryDTO) {
-        Optional<Delivery> existingDeliveryOpt = deliveryRepository.findById(id);
-        if (existingDeliveryOpt.isPresent()) {
-            Delivery existingDelivery = existingDeliveryOpt.get();
-            existingDelivery.setDestination(deliveryDTO.getDestination());
-            existingDelivery.setDeliveryDate(deliveryDTO.getDeliveryDate());
-            existingDelivery.setFromWareHouse(deliveryDTO.getFromWareHouse());
-
-            List<ProductOrder> productOrders = deliveryDTO.getProductOrders().stream()
-                .map(productOrderDTO -> {
-                    ProductOrder productOrder = productOrderService.convertToEntity(productOrderDTO);
-                    productOrder.setDelivery(existingDelivery); // Link to the existing delivery
-                    return productOrder;
+        Optional<Delivery> existingDelivery = deliveryRepository.findById(id);
+        if (existingDelivery.isPresent()) {
+            Delivery delivery = existingDelivery.get();
+            delivery.setDeliveryDate(deliveryDTO.getDeliveryDate());
+            delivery.setFromWareHouse(deliveryDTO.getFromWareHouse());
+            delivery.setDestination(deliveryDTO.getDestination());
+    
+            // Handle existing and new product orders
+            List<ProductOrder> updatedProductOrders = deliveryDTO.getProductOrders().stream()
+                .map(dto -> {
+                    if (dto.getId() == 0) { // ID 0 indicates a new ProductOrder
+                        ProductOrder newProductOrder = productOrderService.convertToEntity(dto);
+                        newProductOrder.setDelivery(delivery);
+                        return newProductOrder;
+                    } else {
+                        Optional<ProductOrder> existingProductOrder = delivery.getProductOrders().stream()
+                            .filter(po -> po.getId() == dto.getId())
+                            .findFirst();
+                        if (existingProductOrder.isPresent()) {
+                            ProductOrder productOrder = existingProductOrder.get();
+                            productOrderService.updateFromDTO(productOrder, dto);
+                            return productOrder;
+                        } else {
+                            // Handle case where ProductOrder ID is provided but does not exist in the current Delivery
+                            throw new RuntimeException("ProductOrder with ID " + dto.getId() + " not found in Delivery");
+                        }
+                    }
                 })
                 .collect(Collectors.toList());
-            existingDelivery.setProductOrders(productOrders);
-            Delivery updatedDelivery = deliveryRepository.save(existingDelivery);
-            return convertToDTO(updatedDelivery);
+    
+            delivery.setProductOrders(updatedProductOrders);
+            Delivery savedDelivery = deliveryRepository.save(delivery);
+            return convertToDTO(savedDelivery);
         } else {
             throw new RuntimeException("Delivery not found");
         }

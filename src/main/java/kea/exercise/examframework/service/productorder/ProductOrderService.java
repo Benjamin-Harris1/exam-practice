@@ -13,6 +13,7 @@ public interface ProductOrderService {
     void deleteProductOrder(int id);
     ProductOrder convertToEntity(ProductOrderDTO productOrderDTO);
     ProductOrderDTO convertToDTO(ProductOrder productOrder);
+    void updateFromDTO(ProductOrder productOrder, ProductOrderDTO productOrderDTO);
 
 
 

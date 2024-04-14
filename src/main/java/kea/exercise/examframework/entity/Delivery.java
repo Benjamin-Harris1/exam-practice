@@ -19,12 +19,12 @@ import java.util.List;
 public class Delivery {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     private LocalDate deliveryDate;
     private String fromWareHouse;
     private String destination;
 
-    @OneToMany(mappedBy = "delivery", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "delivery", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<ProductOrder> productOrders = new ArrayList<>();
 
     public Delivery(LocalDate deliveryDate, String fromWareHouse, String destination) {

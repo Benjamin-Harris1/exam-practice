@@ -58,8 +58,10 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         dto.setQuantity(productOrder.getQuantity());
 
         // Convert product ent to productDTO
-        ProductDTO productDTO = productService.convertToDTO(productOrder.getProduct());
-        dto.setProductId(productDTO.getId());
+        if (productOrder.getProduct() != null){
+            ProductDTO productDTO = productService.convertToDTO(productOrder.getProduct());
+            dto.setProductId(productDTO.getId());
+        }
         return dto;
     }
 
@@ -73,5 +75,22 @@ public class ProductOrderServiceImpl implements ProductOrderService {
         Product product = productService.convertToEntity(productDTO);
         productOrder.setProduct(product);
         return productOrder;
+    }
+
+    public void updateFromDTO(ProductOrder productOrder, ProductOrderDTO productOrderDTO) {
+        // Check for null values to avoid NullPointerException
+        if (productOrder == null || productOrderDTO == null) {
+            throw new IllegalArgumentException("ProductOrder and ProductOrderDTO cannot be null");
+        }
+    
+        // Update fields from productOrderDTO to productOrder
+        productOrder.setQuantity(productOrderDTO.getQuantity());
+
+        if (productOrderDTO.getProductId() > 0) {
+            ProductDTO productDTO = productService.findById(productOrderDTO.getProductId());
+            // Convert to entity
+            Product product = productService.convertToEntity(productDTO);
+            productOrder.setProduct(product);
+        }
     }
 }
