@@ -24,7 +24,7 @@ public class DeliveryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DeliveryDTO> getDeliveryById(int id){
+    public ResponseEntity<DeliveryDTO> getDeliveryById(@PathVariable int id){
         DeliveryDTO delivery = deliveryService.findById(id);
         return ResponseEntity.ok(delivery);
     }
@@ -54,7 +54,7 @@ public class DeliveryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<DeliveryDTO> deleteDelivery(int id){
+    public ResponseEntity<DeliveryDTO> deleteDelivery(@PathVariable int id){
         deliveryService.deleteDelivery(id);
         return ResponseEntity.ok().build();
     }
