@@ -1,20 +1,16 @@
 package kea.exercise.examframework.service.delivery;
 
 import kea.exercise.examframework.dto.DeliveryDTO;
-import kea.exercise.examframework.dto.ProductDTO;
 import kea.exercise.examframework.dto.ProductOrderDTO;
 import kea.exercise.examframework.entity.Delivery;
-import kea.exercise.examframework.entity.Product;
 import kea.exercise.examframework.entity.ProductOrder;
 import kea.exercise.examframework.entity.Van;
 import kea.exercise.examframework.repository.DeliveryRepository;
 import kea.exercise.examframework.repository.VanRepository;
-import kea.exercise.examframework.service.product.ProductService;
 import kea.exercise.examframework.service.productorder.ProductOrderService;
 
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
