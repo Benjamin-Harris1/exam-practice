@@ -29,10 +29,22 @@ public class DeliveryController {
         return ResponseEntity.ok(delivery);
     }
 
+    @GetMapping("/van/{vanId}")
+    public ResponseEntity<List<DeliveryDTO>> getDeliveriesForVan(@PathVariable int vanId){
+        List<DeliveryDTO> deliveries = deliveryService.getDeliveriesForVan(vanId);
+        return ResponseEntity.ok(deliveries);
+    }
+
     @PostMapping
     public ResponseEntity<DeliveryDTO> createDelivery(@RequestBody DeliveryDTO deliveryDTO){
         DeliveryDTO delivery = deliveryService.create(deliveryDTO);
         return ResponseEntity.ok(delivery);
+    }
+
+    @PostMapping("/{deliveryId}/assignToVan/{vanId}")
+    public ResponseEntity<DeliveryDTO> assignDeliveryToVan(@PathVariable int deliveryId, @PathVariable int vanId){
+        deliveryService.assignDeliveryToVan(deliveryId, vanId);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")

@@ -27,6 +27,10 @@ public class Delivery {
     @OneToMany(mappedBy = "delivery", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<ProductOrder> productOrders = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "van_id")
+    private Van van;
+
     public Delivery(LocalDate deliveryDate, String fromWareHouse, String destination) {
         this.deliveryDate = deliveryDate;
         this.fromWareHouse = fromWareHouse;

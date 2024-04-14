@@ -6,7 +6,9 @@ import kea.exercise.examframework.dto.ProductOrderDTO;
 import kea.exercise.examframework.entity.Delivery;
 import kea.exercise.examframework.entity.Product;
 import kea.exercise.examframework.entity.ProductOrder;
+import kea.exercise.examframework.entity.Van;
 import kea.exercise.examframework.repository.DeliveryRepository;
+import kea.exercise.examframework.repository.VanRepository;
 import kea.exercise.examframework.service.product.ProductService;
 import kea.exercise.examframework.service.productorder.ProductOrderService;
 
@@ -22,12 +24,12 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     private final DeliveryRepository deliveryRepository;
     private final ProductOrderService productOrderService;
-    private final ProductService productService;
+    private final VanRepository vanRepository;
 
-    public DeliveryServiceImpl(DeliveryRepository deliveryRepository, ProductOrderService productOrderService, ProductService productService) {
+    public DeliveryServiceImpl(DeliveryRepository deliveryRepository, ProductOrderService productOrderService, VanRepository vanRepository) {
         this.deliveryRepository = deliveryRepository;
         this.productOrderService = productOrderService;
-        this.productService = productService;
+        this.vanRepository = vanRepository;
     }
 
     @Override
@@ -104,6 +106,39 @@ public class DeliveryServiceImpl implements DeliveryService{
         deliveryRepository.deleteById(id);
     }
 
+    @Override
+    public void assignDeliveryToVan(int deliveryId, int vanId) {
+        Optional<Delivery> deliveryOpt = deliveryRepository.findById(deliveryId);
+        Optional<Van> vanOpt = vanRepository.findById(vanId);
+    
+        if (!deliveryOpt.isPresent()) {
+            throw new RuntimeException("Delivery not found");
+        }
+    
+        if (!vanOpt.isPresent()) {
+            throw new RuntimeException("Van not found");
+        }
+    
+        Delivery delivery = deliveryOpt.get();
+        Van van = vanOpt.get();
+
+        // Calculate the weight in grams
+        double totalWeightInGrams = calculateTotalWeight(delivery);
+        double vanCapacityInGrams = van.getCapacity() * 1000;
+    
+        if (totalWeightInGrams > vanCapacityInGrams) {
+            throw new RuntimeException("The total weight of the delivery exceeds the van's capacity");
+        }
+    
+        delivery.setVan(van);
+        deliveryRepository.save(delivery);
+    }
+
+    @Override
+    public List<DeliveryDTO> getDeliveriesForVan(int vanId) {
+        return deliveryRepository.findAllByVanId(vanId).stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
 
     public DeliveryDTO convertToDTO(Delivery delivery) {
         DeliveryDTO dto = new DeliveryDTO();
@@ -133,5 +168,10 @@ public class DeliveryServiceImpl implements DeliveryService{
         return entity;
     }
 
+    private double calculateTotalWeight(Delivery delivery) {
+        return delivery.getProductOrders().stream()
+                .mapToDouble(productOrder -> productOrder.getProduct().getWeight() * productOrder.getQuantity())
+                .sum();
+    }
 
 }
