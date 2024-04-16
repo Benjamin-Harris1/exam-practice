@@ -119,10 +119,16 @@ public class DeliveryServiceImpl implements DeliveryService{
         Van van = vanOpt.get();
 
         // Calculate the weight in grams
-        double totalWeightInGrams = calculateTotalWeight(delivery);
+        double newDeliveryWeightInGrams = calculateTotalWeight(delivery);
+        double existingDeliveriesWeight = van.getDeliveries().stream()
+                .mapToDouble(this::calculateTotalWeight)
+                .sum();
+        // Calculate the total weight including the new delivery
+        double totalWeightIncludingNewDelivery = existingDeliveriesWeight + newDeliveryWeightInGrams;
         double vanCapacityInGrams = van.getCapacity() * 1000;
-    
-        if (totalWeightInGrams > vanCapacityInGrams) {
+
+        // If total weight exceeds the van's capacity, throw an exception
+        if (totalWeightIncludingNewDelivery > vanCapacityInGrams) {
             throw new RuntimeException("The total weight of the delivery exceeds the van's capacity");
         }
     
