@@ -10,4 +10,5 @@ public class ProductDTO {
     private String name;
     private int price;
     private int weight;
+    private boolean isActive;
 }

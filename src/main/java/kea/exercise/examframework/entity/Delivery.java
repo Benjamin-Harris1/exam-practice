@@ -31,6 +31,8 @@ public class Delivery {
     @JoinColumn(name = "van_id")
     private Van van;
 
+    private boolean isActive;
+
     public Delivery(LocalDate deliveryDate, String fromWareHouse, String destination) {
         this.deliveryDate = deliveryDate;
         this.fromWareHouse = fromWareHouse;

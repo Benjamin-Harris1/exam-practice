@@ -27,6 +27,8 @@ public class Product {
     @JsonBackReference
     private List<ProductOrder> productOrders;
 
+    private boolean isActive;
+
 
     public Product(String name, int price, int weight) {
         this.name = name;

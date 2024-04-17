@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.swing.text.html.Option;
+
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -21,22 +23,27 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> findAll() {
-        return productRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
+        return productRepository.findAllByIsActiveTrue().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
     @Override
     public ProductDTO findById(int id) {
-        return productRepository.findById(id).map(this::convertToDTO).orElseThrow(() -> new RuntimeException("Product not found"));
+        Optional<Product> product = productRepository.findById(id)
+        .filter(Product::isActive);
+        return product.map(this::convertToDTO).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
     @Override
     public ProductDTO findByName(String name) {
-        return productRepository.findByName(name).map(this::convertToDTO).orElseThrow(() -> new RuntimeException("Product not found"));
+        Optional<Product> product = productRepository.findByName(name)
+        .filter(Product::isActive);
+        return product.map(this::convertToDTO).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 
     @Override
     public ProductDTO create(ProductDTO productDTO) {
         Product product = convertToEntity(productDTO);
+        product.setActive(true);
         Product savedProduct = productRepository.save(product);
         return convertToDTO(savedProduct);
     }
@@ -57,8 +64,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(int id) {
-        productRepository.deleteById(id);
-
+        Product product = productRepository.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setActive(false);
+        productRepository.save(product);
     }
 
     public ProductDTO convertToDTO(Product product) {
@@ -67,6 +75,7 @@ public class ProductServiceImpl implements ProductService {
         dto.setName(product.getName());
         dto.setPrice(product.getPrice());
         dto.setWeight(product.getWeight());
+        dto.setActive(product.isActive());
 
         return dto;
     }
@@ -77,6 +86,7 @@ public class ProductServiceImpl implements ProductService {
         product.setName(productDTO.getName());
         product.setPrice(productDTO.getPrice());
         product.setWeight(productDTO.getWeight());
+        product.setActive(productDTO.isActive());
 
         return product;
     }
