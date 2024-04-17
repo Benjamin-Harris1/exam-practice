@@ -31,13 +31,14 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     @Override
     public List<DeliveryDTO> findAll() {
-        return deliveryRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
+        return deliveryRepository.findAllByIsActiveTrue().stream().map(this::convertToDTO).collect(Collectors.toList());
 
     }
 
     @Override
     public DeliveryDTO findById(int id) {
-        Optional<Delivery> delivery = deliveryRepository.findById(id);
+        Optional<Delivery> delivery = deliveryRepository.findById(id)
+                .filter(Delivery::isActive);
         return delivery.map(this::convertToDTO).orElseThrow(() -> new RuntimeException("Delivery not found"));
     }
 
@@ -54,6 +55,7 @@ public class DeliveryServiceImpl implements DeliveryService{
             })
             .collect(Collectors.toList()));
         }
+        delivery.setActive(true);
         Delivery savedDelivery = deliveryRepository.save(delivery);
         return convertToDTO(savedDelivery);
     }
@@ -100,7 +102,9 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     @Override
     public void deleteDelivery(int id) {
-        deliveryRepository.deleteById(id);
+        Delivery delivery = deliveryRepository.findById(id).orElseThrow(() -> new RuntimeException("Delivery not found"));
+        delivery.setActive(false);
+        deliveryRepository.save(delivery);
     }
 
     @Override
