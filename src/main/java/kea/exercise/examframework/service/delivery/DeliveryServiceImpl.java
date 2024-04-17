@@ -9,6 +9,7 @@ import kea.exercise.examframework.repository.DeliveryRepository;
 import kea.exercise.examframework.repository.VanRepository;
 import kea.exercise.examframework.service.productorder.ProductOrderService;
 
+import kea.exercise.examframework.utils.DeliveryUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -119,9 +120,9 @@ public class DeliveryServiceImpl implements DeliveryService{
         Van van = vanOpt.get();
 
         // Calculate the weight in grams
-        double newDeliveryWeightInGrams = calculateTotalWeight(delivery);
+        double newDeliveryWeightInGrams = DeliveryUtils.calculateTotalWeight(delivery);
         double existingDeliveriesWeight = van.getDeliveries().stream()
-                .mapToDouble(this::calculateTotalWeight)
+                .mapToDouble(DeliveryUtils::calculateTotalWeight)
                 .sum();
         // Calculate the total weight including the new delivery
         double totalWeightIncludingNewDelivery = existingDeliveriesWeight + newDeliveryWeightInGrams;
@@ -168,12 +169,6 @@ public class DeliveryServiceImpl implements DeliveryService{
         .collect(Collectors.toList());
         entity.setProductOrders(productOrders);
         return entity;
-    }
-
-    private double calculateTotalWeight(Delivery delivery) {
-        return delivery.getProductOrders().stream()
-                .mapToDouble(productOrder -> productOrder.getProduct().getWeight() * productOrder.getQuantity())
-                .sum();
     }
 
 }

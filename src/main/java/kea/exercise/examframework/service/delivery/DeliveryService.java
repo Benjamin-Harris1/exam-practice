@@ -1,6 +1,7 @@
 package kea.exercise.examframework.service.delivery;
 
 import kea.exercise.examframework.dto.DeliveryDTO;
+import kea.exercise.examframework.entity.Delivery;
 
 import java.util.List;
 
@@ -13,4 +14,8 @@ public interface DeliveryService {
 
     void assignDeliveryToVan(int deliveryId, int vanId);
     List<DeliveryDTO> getDeliveriesForVan(int vanId);
+
+    DeliveryDTO convertToDTO(Delivery delivery);
+
+    Delivery convertToEntity(DeliveryDTO deliveryDTO);
 }

@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Getter
 @Setter
@@ -22,6 +24,7 @@ public class Product {
     private int weight;
 
     @OneToMany(mappedBy = "product")
+    @JsonBackReference
     private List<ProductOrder> productOrders;
 
 

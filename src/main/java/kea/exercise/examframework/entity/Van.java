@@ -21,6 +21,7 @@ public class Van {
     private String brand;
     private String model;
     private int capacity;
+    private int remainingCapacity;
 
     @OneToMany(mappedBy = "van")
     private List<Delivery> deliveries;
