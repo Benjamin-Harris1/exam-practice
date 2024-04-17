@@ -5,7 +5,6 @@ import kea.exercise.examframework.dto.VanDTO;
 import kea.exercise.examframework.entity.Van;
 import kea.exercise.examframework.repository.VanRepository;
 import kea.exercise.examframework.service.delivery.DeliveryService;
-import kea.exercise.examframework.utils.DeliveryUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,20 +24,8 @@ public class VanServiceImpl implements VanService {
     @Override
     public List<VanDTO> findAll() {
     List<Van> vans = vanRepository.findAll();
-    return vans.stream().map(van -> {
-        // Calculate the total weight of deliveries for each van
-        double totalWeight = van.getDeliveries().stream()
-                .mapToDouble(DeliveryUtils::calculateTotalWeight)
-                .sum();
-        // Calculate the remaining capacity
-        double remainingCapacity = van.getCapacity() - (totalWeight / 1000);
-
-        // Convert Van to VanDTO, including the calculated remaining capacity
-        VanDTO vanDTO = convertToDTO(van);
-        vanDTO.setRemainingCapacity((int) remainingCapacity);
-        return vanDTO;
-    }).collect(Collectors.toList());
-}
+    return vans.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
 
     @Override
     public Van convertToEntity(VanDTO vanDTO) {
