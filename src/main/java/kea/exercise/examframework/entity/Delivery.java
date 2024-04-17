@@ -24,7 +24,7 @@ public class Delivery {
     private String fromWareHouse;
     private String destination;
 
-    @OneToMany(mappedBy = "delivery", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "delivery", cascade = {CascadeType.ALL})
     private List<ProductOrder> productOrders = new ArrayList<>();
 
     @ManyToOne

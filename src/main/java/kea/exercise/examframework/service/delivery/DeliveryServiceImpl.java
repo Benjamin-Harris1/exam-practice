@@ -11,9 +11,11 @@ import kea.exercise.examframework.service.productorder.ProductOrderService;
 
 import kea.exercise.examframework.utils.DeliveryUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,43 +63,55 @@ public class DeliveryServiceImpl implements DeliveryService{
     }
 
     @Override
+    @Transactional
     public DeliveryDTO update(int id, DeliveryDTO deliveryDTO) {
-        Optional<Delivery> existingDelivery = deliveryRepository.findById(id);
-        if (existingDelivery.isPresent()) {
-            Delivery delivery = existingDelivery.get();
-            delivery.setDeliveryDate(deliveryDTO.getDeliveryDate());
-            delivery.setFromWareHouse(deliveryDTO.getFromWareHouse());
-            delivery.setDestination(deliveryDTO.getDestination());
-    
-            // Handle existing and new product orders
-            List<ProductOrder> updatedProductOrders = deliveryDTO.getProductOrders().stream()
+        Delivery existingDelivery = deliveryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+
+        // Update simple fields
+        existingDelivery.setDeliveryDate(deliveryDTO.getDeliveryDate());
+        existingDelivery.setFromWareHouse(deliveryDTO.getFromWareHouse());
+        existingDelivery.setDestination(deliveryDTO.getDestination());
+
+        // IDs of product orders that should remain
+        Set<Integer> dtoProductOrderIds = deliveryDTO.getProductOrders().stream()
+                .map(ProductOrderDTO::getId)
+                .collect(Collectors.toSet());
+
+        // Find and remove product orders not included in the DTO
+        List<ProductOrder> toRemove = existingDelivery.getProductOrders().stream()
+                .filter(po -> !dtoProductOrderIds.contains(po.getId()))
+                .collect(Collectors.toList());
+        toRemove.forEach(po -> {
+            existingDelivery.getProductOrders().remove(po);
+            productOrderService.deleteProductOrder(po.getId());
+        });
+
+        // Update existing and add new product orders
+        List<ProductOrder> updatedProductOrders = deliveryDTO.getProductOrders().stream()
                 .map(dto -> {
-                    if (dto.getId() == 0) { // ID 0 indicates a new ProductOrder
+                    if (dto.getId() == 0) { // New ProductOrder
                         ProductOrder newProductOrder = productOrderService.convertToEntity(dto);
-                        newProductOrder.setDelivery(delivery);
+                        newProductOrder.setDelivery(existingDelivery);
                         return newProductOrder;
                     } else {
-                        Optional<ProductOrder> existingProductOrder = delivery.getProductOrders().stream()
-                            .filter(po -> po.getId() == dto.getId())
-                            .findFirst();
-                        if (existingProductOrder.isPresent()) {
-                            ProductOrder productOrder = existingProductOrder.get();
-                            productOrderService.updateFromDTO(productOrder, dto);
-                            return productOrder;
-                        } else {
-                            // Handle case where ProductOrder ID is provided but does not exist in the current Delivery
-                            throw new RuntimeException("ProductOrder with ID " + dto.getId() + " not found in Delivery");
-                        }
+                        // Existing ProductOrder, update it
+                        return existingDelivery.getProductOrders().stream()
+                                .filter(po -> po.getId() == (dto.getId()))
+                                .peek(po -> productOrderService.updateFromDTO(po, dto))
+                                .findFirst()
+                                .orElseThrow(() -> new RuntimeException("ProductOrder not found for ID " + dto.getId()));
                     }
                 })
                 .collect(Collectors.toList());
-    
-            delivery.setProductOrders(updatedProductOrders);
-            Delivery savedDelivery = deliveryRepository.save(delivery);
-            return convertToDTO(savedDelivery);
-        } else {
-            throw new RuntimeException("Delivery not found");
-        }
+
+        // Clear the current product orders and add the updated ones
+        existingDelivery.getProductOrders().clear();
+        existingDelivery.getProductOrders().addAll(updatedProductOrders);
+
+        // Save the updated delivery
+        Delivery savedDelivery = deliveryRepository.save(existingDelivery);
+        return convertToDTO(savedDelivery);
     }
 
     @Override
@@ -159,6 +173,7 @@ public class DeliveryServiceImpl implements DeliveryService{
         dto.setDeliveryDate(delivery.getDeliveryDate());
         dto.setFromWareHouse(delivery.getFromWareHouse());
         dto.setDestination(delivery.getDestination());
+        dto.setActive(delivery.isActive());
         // Convert productorder to dto and add to list
         List<ProductOrderDTO> productOrderDTOS = delivery.getProductOrders().stream()
         .map(productOrderService::convertToDTO)
@@ -177,6 +192,7 @@ public class DeliveryServiceImpl implements DeliveryService{
         entity.setDeliveryDate(deliveryDTO.getDeliveryDate());
         entity.setFromWareHouse(deliveryDTO.getFromWareHouse());
         entity.setDestination(deliveryDTO.getDestination());
+        entity.setActive(deliveryDTO.isActive());
 
         List<ProductOrder> productOrders = deliveryDTO.getProductOrders().stream()
         .map(productOrderService::convertToEntity)
