@@ -9,7 +9,7 @@ public interface ProductService {
     List<ProductDTO> findAll();
     ProductDTO findById(int id);
 
-    ProductDTO findByName(String name);
+    List<ProductDTO> findByName(String name);
     ProductDTO create(ProductDTO productDTO);
     ProductDTO update(int id, ProductDTO productDTO);
     void deleteProduct(int id);

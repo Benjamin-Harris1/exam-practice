@@ -12,7 +12,7 @@ INSERT INTO delivery (delivery_date, from_ware_house, destination, is_active) VA
 
 -- Insert products
 INSERT INTO product (name, price, weight, is_active) VALUES ('Kyllingebryst', 25.00, 400, true);
-INSERT INTO product (name, price, weight, is_active) VALUES ('Hakket oksekd', 50.00, 500, true);
+INSERT INTO product (name, price, weight, is_active) VALUES ('Hakket oksekød', 50.00, 500, true);
 INSERT INTO product (name, price, weight, is_active) VALUES ('Kyllingevinger', 74.00, 1200, true);
 INSERT INTO product (name, price, weight, is_active) VALUES ('Fersk laks', 100.00, 300, true);
 INSERT INTO product (name, price, weight, is_active) VALUES ('Økologiske æg', 40.00, 200, true);

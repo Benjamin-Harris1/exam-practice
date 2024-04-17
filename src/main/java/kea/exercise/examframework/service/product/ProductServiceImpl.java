@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.swing.text.html.Option;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -34,10 +33,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDTO findByName(String name) {
-        Optional<Product> product = productRepository.findByName(name)
-        .filter(Product::isActive);
-        return product.map(this::convertToDTO).orElseThrow(() -> new RuntimeException("Product not found"));
+    public List<ProductDTO> findByName(String name) {
+        List<Product> products = productRepository.findByNameContainingIgnoreCaseAndIsActiveTrue(name);
+        return products.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
