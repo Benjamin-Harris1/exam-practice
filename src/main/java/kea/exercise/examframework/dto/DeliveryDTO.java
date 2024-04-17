@@ -16,4 +16,5 @@ public class DeliveryDTO {
     private String fromWareHouse;
     private String destination;
     private List<ProductOrderDTO> productOrders = new ArrayList<>();
+    private int vanId;
 }

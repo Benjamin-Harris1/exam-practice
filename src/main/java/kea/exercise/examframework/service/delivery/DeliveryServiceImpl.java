@@ -160,6 +160,10 @@ public class DeliveryServiceImpl implements DeliveryService{
         .map(productOrderService::convertToDTO)
         .collect(Collectors.toList());
         dto.setProductOrders(productOrderDTOS);
+
+        if (delivery.getVan() != null) {
+            dto.setVanId(delivery.getVan().getId());
+        }
         return dto;
     }
 
